@@ -3,6 +3,28 @@ entries:
   atlantis:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-01-02T23:26:49.638746821Z"
+    description: A Helm chart for deploying Atlantis on Kubernetes
+    digest: ceceb081647f9e9865bc26173a428a945dfdc3df71553cb45835ec225412dc0c
+    home: https://github.com/k8sforge/atlantis-charts
+    icon: https://avatars.githubusercontent.com/u/32311288
+    keywords:
+    - atlantis
+    - terraform
+    - automation
+    - ci-cd
+    maintainers:
+    - name: k8sforge
+    name: atlantis
+    sources:
+    - https://github.com/runatlantis/atlantis
+    - https://github.com/k8sforge/atlantis-charts
+    type: application
+    urls:
+    - https://github.com/k8sforge/atlantis-charts/releases/download/atlantis-0.1.9/atlantis-0.1.9.tgz
+    version: 0.1.9
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-01-02T23:12:13.965159143Z"
     description: A Helm chart for deploying Atlantis on Kubernetes
     digest: 34e598d5b779aa2068c8cc04f6519238b39532f4df7e8235e35841023e4ec18e
@@ -67,4 +89,4 @@ entries:
     urls:
     - https://github.com/k8sforge/atlantis-charts/releases/download/atlantis-0.1.6/atlantis-0.1.6.tgz
     version: 0.1.6
-generated: "2026-01-02T23:12:13.965176188Z"
+generated: "2026-01-02T23:26:49.638765075Z"
