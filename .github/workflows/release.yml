@@ -4,77 +4,20 @@ on:
   push:
     tags:
       - "v*"
-  workflow_run:
-    workflows: ["Auto Tag Release"]
-    types:
-      - completed
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Chart version (e.g., 0.1.0)"
-        required: true
 
 jobs:
   package:
-    name: Package and Release Chart
+    name: Package Chart
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
-        with:
-          version: "latest"
-
-      - name: Extract and Update Version
-        uses: actions/github-script@v8
-        id: version
-        with:
-          script: |
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            let version;
-
-            if (context.eventName === 'workflow_dispatch') {
-              version = '${{ github.event.inputs.version }}';
-            } else if (context.eventName === 'workflow_run') {
-              // Get the latest version tag (matching v* pattern, excluding 'latest')
-              try {
-                // Fetch all tags first
-                execSync('git fetch --tags', { encoding: 'utf-8' });
-                // Use git describe with match pattern to only get version tags
-                const latestTag = execSync('git describe --tags --match "v*" --abbrev=0', { encoding: 'utf-8' }).trim();
-                if (!latestTag || latestTag === 'latest') {
-                  core.setFailed('Could not find a valid version tag');
-                  process.exit(1);
-                }
-                version = latestTag.replace(/^v/, '');
-              } catch (error) {
-                core.setFailed(`Could not find a version tag: ${error.message}`);
-                process.exit(1);
-              }
-            } else {
-              const ref = context.ref;
-              version = ref.replace('refs/tags/v', '');
-            }
-
-            if (!version || version === 'latest') {
-              core.setFailed(`Invalid version extracted: ${version}`);
-              process.exit(1);
-            }
-
-            core.setOutput('version', version);
-
-            // Update Chart.yaml
-            const chartYaml = fs.readFileSync('Chart.yaml', 'utf8');
-            const updated = chartYaml.replace(/^version:.*/m, `version: ${version}`);
-            fs.writeFileSync('Chart.yaml', updated);
 
       - name: Lint Chart
         run: helm lint .
