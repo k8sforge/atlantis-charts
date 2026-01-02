@@ -43,10 +43,10 @@ jobs:
           fi
 
       - name: Get latest version tag
-        id: get-version
+        id: get-tag
         if: github.event_name == 'workflow_run'
         run: |
-          git fetch --tags
+          git fetch --tags --force
           LATEST_TAG=$(git describe --tags --match "v*" --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LATEST_TAG" ]; then
             echo "No version tag found"
@@ -54,11 +54,6 @@ jobs:
           fi
           echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
           echo "Found tag: $LATEST_TAG"
-
-      - name: Checkout version tag
-        if: github.event_name == 'workflow_run' && steps.get-version.outputs.tag != ''
-        run: |
-          git checkout ${{ steps.get-version.outputs.tag }}
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
@@ -71,6 +66,15 @@ jobs:
           helm package . --destination .cr-release-packages
 
       # Publish the packaged .tgz + index.yaml to gh-pages
+      - name: Set GITHUB_REF for chart-releaser
+        id: set-ref
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "ref=refs/tags/${{ steps.get-tag.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
@@ -79,3 +83,4 @@ jobs:
           pages_branch: gh-pages
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ steps.set-ref.outputs.ref }}
