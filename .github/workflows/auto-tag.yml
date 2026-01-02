@@ -30,23 +30,23 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const commitSha = context.payload.pull_request.merge_commit_sha;
+            const prHeadSha = context.payload.pull_request.head.sha;
             const repo = context.repo;
 
             const runs = await github.rest.actions.listWorkflowRunsForRepo({
               owner: repo.owner,
               repo: repo.repo,
-              head_sha: commitSha,
+              head_sha: prHeadSha,
             });
 
             const helmValidate = runs.data.workflow_runs.find(
-              run => run.name === 'Helm Chart Validation' && run.head_sha === commitSha
+              run => run.name === 'Helm Chart Validation' && run.head_sha === prHeadSha
             );
             const k8sValidate = runs.data.workflow_runs.find(
-              run => run.name === 'Kubernetes Manifest Validation' && run.head_sha === commitSha
+              run => run.name === 'Kubernetes Manifest Validation' && run.head_sha === prHeadSha
             );
             const yamlLint = runs.data.workflow_runs.find(
-              run => run.name === 'YAML Lint' && run.head_sha === commitSha
+              run => run.name === 'YAML Lint' && run.head_sha === prHeadSha
             );
 
             const allPassed = helmValidate?.conclusion === 'success' &&
