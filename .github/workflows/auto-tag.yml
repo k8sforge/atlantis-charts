@@ -78,3 +78,9 @@ jobs:
           VERSION="${{ steps.check-tag.outputs.version }}"
           git tag -a "v${VERSION}" -m "Release v${VERSION}"
           git push origin "v${VERSION}"
+
+      - name: Update latest tag
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          git tag -f -a "latest" -m "Latest release"
+          git push origin "latest" --force
