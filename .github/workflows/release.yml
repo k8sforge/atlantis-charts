@@ -44,19 +44,29 @@ jobs:
             if (context.eventName === 'workflow_dispatch') {
               version = '${{ github.event.inputs.version }}';
             } else if (context.eventName === 'workflow_run') {
-              // Get the latest tag from the repository
+              // Get the latest version tag (matching v* pattern, excluding 'latest')
               try {
                 // Fetch all tags first
                 execSync('git fetch --tags', { encoding: 'utf-8' });
-                const latestTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf-8' }).trim();
+                // Use git describe with match pattern to only get version tags
+                const latestTag = execSync('git describe --tags --match "v*" --abbrev=0', { encoding: 'utf-8' }).trim();
+                if (!latestTag || latestTag === 'latest') {
+                  core.setFailed('Could not find a valid version tag');
+                  process.exit(1);
+                }
                 version = latestTag.replace(/^v/, '');
               } catch (error) {
-                core.setFailed('Could not find a version tag');
+                core.setFailed(`Could not find a version tag: ${error.message}`);
                 process.exit(1);
               }
             } else {
               const ref = context.ref;
               version = ref.replace('refs/tags/v', '');
+            }
+
+            if (!version || version === 'latest') {
+              core.setFailed(`Invalid version extracted: ${version}`);
+              process.exit(1);
             }
 
             core.setOutput('version', version);
