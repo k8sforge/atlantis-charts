@@ -1,9 +1,7 @@
 name: Auto Tag Release
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
       - master
@@ -14,84 +12,46 @@ on:
         required: false
 
 jobs:
+  yaml-lint:
+    name: YAML Lint
+    uses: ./.github/workflows/yaml-lint.yml
+    if: github.event_name != 'workflow_dispatch'
+
+  helm-validate:
+    name: Helm Chart Validation
+    uses: ./.github/workflows/helm-validate.yml
+    if: github.event_name != 'workflow_dispatch'
+
+  k8s-validate:
+    name: Kubernetes Manifest Validation
+    uses: ./.github/workflows/k8s-validate.yml
+    if: github.event_name != 'workflow_dispatch'
+
   tag-release:
     name: Create Release Tag
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
+    needs: [yaml-lint, helm-validate, k8s-validate]
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (always() &&
+       (needs.yaml-lint.result == 'success' || needs.yaml-lint.result == 'skipped') &&
+       (needs.helm-validate.result == 'success' || needs.helm-validate.result == 'skipped') &&
+       (needs.k8s-validate.result == 'success' || needs.k8s-validate.result == 'skipped'))
     permissions:
       contents: write
       pull-requests: read
       actions: read
 
     steps:
-      - name: Check required workflows passed
-        if: github.event_name != 'workflow_dispatch'
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const prHeadSha = context.payload.pull_request.head.sha;
-            const repo = context.repo;
-
-            const runs = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: repo.owner,
-              repo: repo.repo,
-              head_sha: prHeadSha,
-            });
-
-            const helmValidate = runs.data.workflow_runs.find(
-              run => run.name === 'Helm Chart Validation' && run.head_sha === prHeadSha
-            );
-            const k8sValidate = runs.data.workflow_runs.find(
-              run => run.name === 'Kubernetes Manifest Validation' && run.head_sha === prHeadSha
-            );
-            const yamlLint = runs.data.workflow_runs.find(
-              run => run.name === 'YAML Lint' && run.head_sha === prHeadSha
-            );
-
-            const allPassed = helmValidate?.conclusion === 'success' &&
-                             k8sValidate?.conclusion === 'success' &&
-                             yamlLint?.conclusion === 'success';
-
-            if (!allPassed) {
-              const helmStatus = helmValidate?.conclusion || 'not found';
-              const k8sStatus = k8sValidate?.conclusion || 'not found';
-              const yamlStatus = yamlLint?.conclusion || 'not found';
-              core.setFailed(
-                `Required workflows did not pass. Helm: ${helmStatus}, K8s: ${k8sStatus}, YAML Lint: ${yamlStatus}`
-              );
-            }
-
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          ref: ${{ github.sha }}
 
-      - name: Check if Chart.yaml changed
-        id: check-chart
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            COMMIT_SHA="${{ github.event.pull_request.merge_commit_sha }}"
-            if git diff-tree --no-commit-id --name-only -r ${COMMIT_SHA} | grep -q "^Chart.yaml$"; then
-              echo "changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "changed=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-      - name: Configure Git
-        if: steps.check-chart.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Extract Version from Chart.yaml
-        if: steps.check-chart.outputs.changed == 'true'
-        id: version
+      - name: Check if tag exists
+        id: check-tag
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
@@ -100,21 +60,21 @@ jobs:
           fi
           VERSION=${VERSION#v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Check if tag exists
-        if: steps.check-chart.outputs.changed == 'true'
-        id: check-tag
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
           if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create and push tag
-        if: steps.check-chart.outputs.changed == 'true' && steps.check-tag.outputs.exists == 'false'
+      - name: Configure Git
+        if: steps.check-tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.check-tag.outputs.version }}"
           git tag -a "v${VERSION}" -m "Release v${VERSION}"
           git push origin "v${VERSION}"
