@@ -23,6 +23,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Configure git
         run: |
@@ -41,6 +42,24 @@ jobs:
             git checkout main || git checkout master
           fi
 
+      - name: Get latest version tag
+        id: get-version
+        if: github.event_name == 'workflow_run'
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags --match "v*" --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No version tag found"
+            exit 1
+          fi
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Found tag: $LATEST_TAG"
+
+      - name: Checkout version tag
+        if: github.event_name == 'workflow_run' && steps.get-version.outputs.tag != ''
+        run: |
+          git checkout ${{ steps.get-version.outputs.tag }}
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
 
@@ -58,6 +77,5 @@ jobs:
           charts_dir: .
           skip_packaging: true
           pages_branch: gh-pages
-          push: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
