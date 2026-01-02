@@ -1,0 +1,15 @@
+{{- if eq .Values.deployment.type "deployment" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "atlantis.fullname" . }}
+  labels:
+    {{- include "atlantis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "atlantis.selectorLabels" . | nindent 6 }}
+  template:
+    {{- include "atlantis.podTemplate" . | nindent 4 }}
+{{- end }}

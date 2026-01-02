@@ -1,0 +1,144 @@
+# Default values for atlantis
+# This is a YAML-formatted file.
+
+# Image configuration
+image:
+  repository: runatlantis/atlantis
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Replica count
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 4141
+  annotations: {}
+
+# Deployment configuration
+deployment:
+  # Type: "deployment" for standard Kubernetes Deployment, "rollout" for Argo Rollouts
+  type: rollout
+  # Strategy: "blueGreen" or "canary" (only used if type == rollout)
+  strategy: blueGreen
+  # Auto-promotion settings (only used if type == rollout)
+  autoPromotionEnabled: false
+  scaleDownDelaySeconds: 30
+  # Canary strategy configuration (only used if strategy == canary)
+  canary:
+    steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 40
+      - pause: { duration: 10s }
+      - setWeight: 60
+      - pause: { duration: 10s }
+      - setWeight: 80
+      - pause: { duration: 10s }
+    analysis:
+    # Optional: Add analysis configuration here
+    #   interval: 30s
+    #   successCondition: "success"
+    #   failureCondition: "failure"
+
+# Resource limits and requests
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 4141
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: 4141
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+# Atlantis configuration
+atlantis:
+  dataDir: "/atlantis-data"
+  checkoutStrategy: "merge"
+
+  # Repository allowlist (supports wildcards)
+  repoAllowlist: "github.com/*"
+
+  # Repository configuration JSON
+  repoConfig:
+    repos:
+      - id: "/.*/"
+        allowed_overrides:
+          - "workflow"
+        apply_requirements:
+          - "approved"
+    workflows:
+      default:
+        plan:
+          steps:
+            - "init"
+            - "plan"
+        apply:
+          steps:
+            - "init"
+            - "apply"
+
+# Authentication - GitHub Personal Access Token
+github:
+  # Option 1: Personal Access Token
+  user: ""
+  token: ""
+
+  # Option 2: GitHub App
+  app:
+    id: ""
+    key: ""
+    installationId: ""
+
+  webhookSecret: ""
+
+# Ingress configuration
+ingress:
+  enabled: true
+  # Ingress class name (e.g., "alb", "nginx", "traefik")
+  className: ""
+  # Ingress annotations (platform-specific)
+  # Example for AWS ALB:
+  # annotations:
+  #   alb.ingress.kubernetes.io/scheme: internet-facing
+  #   alb.ingress.kubernetes.io/target-type: ip
+  #   alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+  #   alb.ingress.kubernetes.io/backend-protocol: HTTP
+  # Example for nginx:
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt-prod
+  #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  annotations: {}
+  hosts:
+    - host: atlantis.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  # TLS configuration (optional)
+  # tls:
+  #   - secretName: atlantis-tls
+  #     hosts:
+  #       - atlantis.example.com
+
+# Labels and annotations
+labels: {}
+annotations: {}
+
+# Name override (defaults to chart name)
+nameOverride: ""
+fullnameOverride: ""

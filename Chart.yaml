@@ -1,0 +1,18 @@
+apiVersion: v2
+name: atlantis
+description: A Helm chart for deploying Atlantis on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "latest"
+icon: https://avatars.githubusercontent.com/u/32311288
+keywords:
+  - atlantis
+  - terraform
+  - automation
+  - ci-cd
+maintainers:
+  - name: k8sforge
+home: https://github.com/k8sforge/atlantis-charts
+sources:
+  - https://github.com/runatlantis/atlantis
+  - https://github.com/k8sforge/atlantis-charts
