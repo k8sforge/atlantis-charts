@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "atlantis.fullname" . }}-config
+  labels:
+    {{- include "atlantis.labels" . | nindent 4 }}
+data:
+  repo-allowlist: {{ .Values.atlantis.repoAllowlist | quote }}
+  repo-config.json: |
+    {{- .Values.atlantis.repoConfig | toJson | nindent 4 }}

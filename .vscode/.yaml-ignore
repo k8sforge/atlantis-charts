@@ -1,0 +1,3 @@
+# Ignore Helm template files from YAML validation
+# These files contain Go templating syntax which isn't valid YAML
+templates/
