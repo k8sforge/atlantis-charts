@@ -66,21 +66,22 @@ jobs:
           helm package . --destination .cr-release-packages
 
       # Publish the packaged .tgz + index.yaml to gh-pages
-      - name: Set GITHUB_REF for chart-releaser
-        id: set-ref
+      - name: Install chart-releaser
         run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "ref=refs/tags/${{ steps.get-tag.outputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
-          fi
+          curl -LO \
+            "https://github.com/helm/chart-releaser/releases/download/v1.7.0/chart-releaser_1.7.0_linux_amd64.tar.gz"
+          tar -xzf chart-releaser_1.7.0_linux_amd64.tar.gz
+          sudo mv cr /usr/local/bin/
+          cr version
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          charts_dir: .
-          skip_packaging: true
-          pages_branch: gh-pages
+      - name: Update chart index and push to gh-pages
+        run: |
+          cr index \
+            --owner k8sforge \
+            --git-repo atlantis-charts \
+            --package-path .cr-release-packages \
+            --pages-branch gh-pages \
+            --pages-index-path . \
+            --push
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REF: ${{ steps.set-ref.outputs.ref }}
