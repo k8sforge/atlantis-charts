@@ -1,9 +1,13 @@
-name: Release chart to GitHub Pages
+name: Release Chart to GitHub Pages
 
 on:
   push:
     tags:
       - "v*"
+  workflow_run:
+    workflows: ["Auto Tag Release"]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -11,6 +15,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
