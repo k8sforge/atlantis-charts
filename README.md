@@ -144,7 +144,7 @@ github:
 
 The chart expects a Kubernetes Secret named:
 
-```
+```plaintext
 <release-name>-secrets
 ```
 
