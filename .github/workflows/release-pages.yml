@@ -47,13 +47,22 @@ jobs:
           helm dependency update . || true
           helm package . --destination .cr-release-packages
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          charts_dir: .
-          skip_packaging: true
-          skip_upload: true
-          mark_as_latest: false
-          pages_branch: gh-pages
+      - name: Install chart-releaser
+        run: |
+          curl -LO \
+            "https://github.com/helm/chart-releaser/releases/download/v1.7.0/chart-releaser_1.7.0_linux_amd64.tar.gz"
+          tar -xzf chart-releaser_1.7.0_linux_amd64.tar.gz
+          sudo mv cr /usr/local/bin/
+          cr version
+
+      - name: Update chart index and push to gh-pages
+        run: |
+          cr index \
+            --owner k8sforge \
+            --git-repo atlantis-charts \
+            --package-path .cr-release-packages \
+            --pages-branch gh-pages \
+            --pages-index-path . \
+            --push
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
