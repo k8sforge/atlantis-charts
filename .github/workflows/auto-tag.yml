@@ -18,7 +18,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
 
   helm-validate:
-    name: Helm Chart Validation
+    name: Helm Lint and Validate
     uses: ./.github/workflows/helm-validate.yml
     if: github.event_name != 'workflow_dispatch'
 
