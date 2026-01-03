@@ -2,6 +2,10 @@
 
 ![Auto Tag Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/auto-tag.yml/badge.svg)
 
+![Helm Chart Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/release.yml/badge.svg)
+
+![Helm Chart Page Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/release-pages.yml/badge.svg)
+
 A production-ready Helm chart for deploying [Atlantis](https://www.runatlantis.io/) on Kubernetes. Atlantis automates Terraform workflows through pull requests.
 
 ---

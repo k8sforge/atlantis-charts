@@ -1,5 +1,11 @@
 # Atlantis Helm Chart Repository
 
+![Auto Tag Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/auto-tag.yml/badge.svg)
+
+![Helm Chart Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/release.yml/badge.svg)
+
+![Helm Chart Page Release](https://github.com/k8sforge/atlantis-charts/actions/workflows/release-pages.yml/badge.svg)
+
 This is a Helm chart repository for the [Atlantis](https://www.runatlantis.io/) Helm chart.
 
 ## Quick Start
