@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch tags
         run: git fetch --tags --force
@@ -52,6 +53,7 @@ jobs:
           charts_dir: .
           skip_packaging: true
           skip_upload: true
+          mark_as_latest: false
           pages_branch: gh-pages
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
