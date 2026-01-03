@@ -6,11 +6,10 @@ on:
       - "Chart.yaml"
       - "values.yaml"
       - "templates/**"
-      - ".github/workflows/helm-validate.yml"
   workflow_call:
 
 jobs:
-  helm-validate:
+  helm-lint-validate:
     uses: actionsforge/actions/.github/workflows/helm-lint-validate.yml@main
     with:
       chart_dir: "."
