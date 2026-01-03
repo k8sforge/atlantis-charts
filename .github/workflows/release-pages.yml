@@ -57,12 +57,15 @@ jobs:
 
       - name: Update chart index and push to gh-pages
         run: |
+          mkdir -p .cr-index
           cr index \
             --owner k8sforge \
             --git-repo atlantis-charts \
             --package-path .cr-release-packages \
+            --index-path .cr-index/index.yaml \
             --pages-branch gh-pages \
-            --pages-index-path . \
-            --push
+            --pages-index-path index.yaml \
+            --push \
+            --token "$CR_TOKEN"
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
