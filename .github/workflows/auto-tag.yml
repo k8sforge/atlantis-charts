@@ -19,7 +19,7 @@ jobs:
 
   helm-validate:
     name: Helm Lint and Validate
-    uses: ./.github/workflows/helm-validate.yml
+    uses: ./.github/workflows/helm-lint-validate.yml
     if: github.event_name != 'workflow_dispatch'
 
   k8s-validate:
