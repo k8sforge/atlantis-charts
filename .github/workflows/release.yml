@@ -21,14 +21,14 @@ jobs:
       - name: Lint Chart
         run: helm lint .
 
-      - name: Package Chart
-        run: |
-          helm package .
-          helm show chart *.tgz
+      # - name: Package Chart
+      #   run: |
+      #     helm package .
+      #     helm show chart *.tgz
 
-      - name: Upload Chart Artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: helm-chart
-          path: "*.tgz"
-          retention-days: 30
+      # - name: Upload Chart Artifacts
+      #   uses: actions/upload-artifact@v6
+      #   with:
+      #     name: helm-chart
+      #     path: "*.tgz"
+      #     retention-days: 30
