@@ -3,9 +3,9 @@ entries:
   atlantis:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-01-03T01:40:13.820459722Z"
+    created: "2026-01-03T01:46:50.982711302Z"
     description: A Helm chart for deploying Atlantis on Kubernetes
-    digest: 4ffab70556257d00c0a99f2903227941ae13fa49033700bdbe6548eb4156be3e
+    digest: d8147cba385578d167a01378ae5dfe5d54cdc3c387e8fb1749b5dc0c9c7d4506
     home: https://github.com/k8sforge/atlantis-charts
     icon: https://avatars.githubusercontent.com/u/32311288
     keywords:
@@ -23,4 +23,4 @@ entries:
     urls:
     - https://k8sforge.github.io/atlantis-charts/atlantis-0.2.6.tgz
     version: 0.2.6
-generated: "2026-01-03T01:40:13.817779758Z"
+generated: "2026-01-03T01:46:50.97967545Z"
