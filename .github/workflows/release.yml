@@ -1,9 +1,9 @@
 name: Release Helm Chart
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: ["Auto Tag Release"]
+    types: [completed]
 
 jobs:
   package:
