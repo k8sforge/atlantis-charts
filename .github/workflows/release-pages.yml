@@ -29,7 +29,13 @@ jobs:
 
       - name: Checkout tag
         run: |
-          git checkout "${{ steps.tag.outputs.tag }}"
+          git checkout -b release-branch "${{ steps.tag.outputs.tag }}"
+          git config advice.detachedHead false
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
