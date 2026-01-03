@@ -1,0 +1,17 @@
+name: Helm Lint and Validate
+
+on:
+  pull_request:
+    paths:
+      - "Chart.yaml"
+      - "values.yaml"
+      - "templates/**"
+  workflow_call:
+
+jobs:
+  helm-lint-validate:
+    uses: actionsforge/actions/.github/workflows/helm-lint-validate.yml@main
+    with:
+      chart_dir: "."
+      values_file: "values.yaml"
+      kube_version: "1.33.0"
