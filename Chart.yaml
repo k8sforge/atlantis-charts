@@ -2,7 +2,7 @@ apiVersion: v2
 name: atlantis
 description: A Helm chart for deploying Atlantis on Kubernetes
 type: application
-version: 0.2.7
+version: 0.2.8
 appVersion: "latest"
 icon: https://avatars.githubusercontent.com/u/32311288
 keywords:
