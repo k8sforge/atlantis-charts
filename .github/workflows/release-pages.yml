@@ -65,6 +65,7 @@ jobs:
             --index-path .cr-index/index.yaml \
             --pages-branch gh-pages \
             --pages-index-path index.yaml \
+            --packages-with-index \
             --push \
             --token "$CR_TOKEN"
         env:
